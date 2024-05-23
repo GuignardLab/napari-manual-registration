@@ -1,6 +1,6 @@
 __version__ = "0.0.1"
 
-from .poc_manual_registration import RegistrationWidget
+from ._widget import RegistrationWidget
 __all__ = (
     "RegistrationWidget"
 )
