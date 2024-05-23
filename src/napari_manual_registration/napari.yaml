@@ -7,7 +7,7 @@ visibility: public
 contributions:
   commands:
     - id: napari-manual-registration.run_registration
-      python_name: napari_manual-registration:RegistrationWidget
+      python_name: napari_manual_registration:RegistrationWidget
       title: Run manual registration
   widgets:
     - command: napari-manual-registration.run_registration
