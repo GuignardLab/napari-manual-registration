@@ -1,0 +1,14 @@
+name: napari-manual-registration
+display_name: Manual registration
+# use 'hidden' to remove plugin from napari hub search results
+visibility: public
+# see https://napari.org/stable/plugins/manifest.html for valid categories
+# categories: ["Annotation", "Segmentation", "Acquisition"]
+contributions:
+  commands:
+    - id: napari-manual-registration.run_registration
+      python_name: napari_manual_registration:RegistrationWidget
+      title: Run manual registration
+  widgets:
+    - command: napari-manual-registration.run_registration
+      display_name: Manual registration
