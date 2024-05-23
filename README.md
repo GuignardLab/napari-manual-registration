@@ -1,11 +1,11 @@
-# napari-manualregistration
+# napari-manual-registration
 
-[![License BSD-3](https://img.shields.io/pypi/l/napari-manualregistration.svg?color=green)](https://github.com/GuignardLab/napari-manualregistration/raw/main/LICENSE)
-[![PyPI](https://img.shields.io/pypi/v/napari-manualregistration.svg?color=green)](https://pypi.org/project/napari-manualregistration)
-[![Python Version](https://img.shields.io/pypi/pyversions/napari-manualregistration.svg?color=green)](https://python.org)
-[![tests](https://github.com/GuignardLab/napari-manualregistration/workflows/tests/badge.svg)](https://github.com/GuignardLab/napari-manualregistration/actions)
-[![codecov](https://codecov.io/gh/GuignardLab/napari-manualregistration/branch/main/graph/badge.svg)](https://codecov.io/gh/GuignardLab/napari-manualregistration)
-[![napari hub](https://img.shields.io/endpoint?url=https://api.napari-hub.org/shields/napari-manualregistration)](https://napari-hub.org/plugins/napari-manualregistration)
+[![License BSD-3](https://img.shields.io/pypi/l/napari-manual-registration.svg?color=green)](https://github.com/jules-vanaret/napari-manual-registration/raw/main/LICENSE)
+[![PyPI](https://img.shields.io/pypi/v/napari-manual-registration.svg?color=green)](https://pypi.org/project/napari-manual-registration)
+[![Python Version](https://img.shields.io/pypi/pyversions/napari-manual-registration.svg?color=green)](https://python.org)
+[![tests](https://github.com/jules-vanaret/napari-manual-registration/workflows/tests/badge.svg)](https://github.com/jules-vanaret/napari-manual-registration/actions)
+[![codecov](https://codecov.io/gh/jules-vanaret/napari-manual-registration/branch/main/graph/badge.svg)](https://codecov.io/gh/jules-vanaret/napari-manual-registration)
+[![napari hub](https://img.shields.io/endpoint?url=https://api.napari-hub.org/shields/napari-manual-registration)](https://napari-hub.org/plugins/napari-manual-registration)
 
 A simple plugin to register 2 views of the same object
 
@@ -23,15 +23,15 @@ https://napari.org/stable/plugins/index.html
 
 ## Installation
 
-You can install `napari-manualregistration` via [pip]:
+You can install `napari-manual-registration` via [pip]:
 
-    pip install napari-manualregistration
+    pip install napari-manual-registration
 
 
 
 To install latest development version :
 
-    pip install git+https://github.com/GuignardLab/napari-manualregistration.git
+    pip install git+https://github.com/jules-vanaret/napari-manual-registration.git
 
 
 ## Contributing
@@ -42,7 +42,7 @@ the coverage at least stays the same before you submit a pull request.
 ## License
 
 Distributed under the terms of the [BSD-3] license,
-"napari-manualregistration" is free and open source software
+"napari-manual-registration" is free and open source software
 
 ## Issues
 
@@ -59,7 +59,7 @@ If you encounter any problems, please [file an issue] along with a detailed desc
 [Mozilla Public License 2.0]: https://www.mozilla.org/media/MPL/2.0/index.txt
 [cookiecutter-napari-plugin]: https://github.com/napari/cookiecutter-napari-plugin
 
-[file an issue]: https://github.com/GuignardLab/napari-manualregistration/issues
+[file an issue]: https://github.com/jules-vanaret/napari-manual-registration/issues
 
 [napari]: https://github.com/napari/napari
 [tox]: https://tox.readthedocs.io/en/latest/
