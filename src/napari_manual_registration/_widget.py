@@ -359,25 +359,3 @@ class RegistrationWidget(Container):
         self._slider_rz.value = angles[0]
         self._slider_ry.value = angles[1]
         self._slider_rx.value = angles[2]
-
-
-# import tifffile
-# # path_to_data = rf'C:\Users\gros\Desktop\DATA\manual_reg_test'
-# path_to_data = '/home/jvanaret/data/project_egg/spatial_registration'
-# top=tifffile.imread(f'{path_to_data}/top_small.tif')
-# bottom=tifffile.imread(f'{path_to_data}/bottom_small.tif')
-# # top=tifffile.imread(f'{path_to_data}/2_top.tif')[:,1,:,:]
-# # bottom=tifffile.imread(f'{path_to_data}/1_bottom.tif')[:,1,:,:]
-
-
-# viewer = napari.Viewer(ndisplay=2)
-
-# viewer.add_image(top, name='top', colormap='red', blending='additive')
-# # viewer.layers[-1].visible = False
-# viewer.add_image(bottom, name='bottom', colormap='cyan', blending='additive', rendering='attenuated_mip')
-
-# viewer.camera.perspective = 24
-# viewer.grid.enabled = True
-
-# viewer.window.add_dock_widget(RegistrationWidget(viewer), area='right')
-# napari.run()
