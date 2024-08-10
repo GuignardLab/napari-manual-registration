@@ -185,7 +185,9 @@ class RegistrationWidget(Container):
             with open(file_path, "w") as json_file:
                 json.dump(data_to_save, json_file, indent=4)
 
-            print(f"Data saved to path {file_path}")
+            napari.utils.notifications.show_info(
+                f"Transformation saved to {file_path}"
+            )
 
     def _store_data(self, event):
         self._floating_data = self._layer_floating.value.data
