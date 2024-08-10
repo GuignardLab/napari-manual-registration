@@ -1,7 +1,6 @@
 import json
 import os
 import time
-import warnings
 
 import napari
 import numpy as np
@@ -167,7 +166,9 @@ class RegistrationWidget(Container):
     def _save_to_json(self):
         path = str(self._save_json_path.value)
         if path == "." or not os.path.exists(path):
-            napari.utils.notifications.show_warning("Please select a directory first.")
+            napari.utils.notifications.show_warning(
+                "Please select a directory first."
+            )
         else:
             # Example data to save into JSON
             data_to_save = {
@@ -271,7 +272,9 @@ class RegistrationWidget(Container):
             try:
                 self._viewer.layers.remove(self._landmarks_layer_ref)
             except ValueError:
-                napari.utils.notifications.show_warning(f"Layer {self._landmarks_layer_ref.name} not found")
+                napari.utils.notifications.show_warning(
+                    f"Layer {self._landmarks_layer_ref.name} not found"
+                )
 
         self._landmarks_layer_ref = self._viewer.add_labels(
             np.zeros(self._layer_ref.value.data.shape, dtype=np.uint8),
@@ -282,7 +285,9 @@ class RegistrationWidget(Container):
             try:
                 self._viewer.layers.remove(self._landmarks_layer_floating)
             except ValueError:
-                napari.utils.notifications.show_warning(f"Layer {self._landmarks_layer_floating.name} not found")
+                napari.utils.notifications.show_warning(
+                    f"Layer {self._landmarks_layer_floating.name} not found"
+                )
 
         self._landmarks_layer_floating = self._viewer.add_labels(
             np.zeros(self._layer_floating.value.data.shape, dtype=np.uint8),
@@ -351,7 +356,7 @@ class RegistrationWidget(Container):
 
         translation_vector = (
             centermass_ref - rotation_matrix @ centermass_float
-        ) 
+        )
 
         return translation_vector, rotation_matrix
 
