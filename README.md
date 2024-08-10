@@ -1,4 +1,4 @@
-# napari-manual-registration
+# :herb: napari-manual-registration
 
 [![License BSD-3](https://img.shields.io/pypi/l/napari-manual-registration.svg?color=green)](https://github.com/jules-vanaret/napari-manual-registration/raw/main/LICENSE)
 [![PyPI](https://img.shields.io/pypi/v/napari-manual-registration.svg?color=green)](https://pypi.org/project/napari-manual-registration)
@@ -7,31 +7,41 @@
 [![codecov](https://codecov.io/gh/jules-vanaret/napari-manual-registration/branch/main/graph/badge.svg)](https://codecov.io/gh/jules-vanaret/napari-manual-registration)
 [![napari hub](https://img.shields.io/endpoint?url=https://api.napari-hub.org/shields/napari-manual-registration)](https://napari-hub.org/plugins/napari-manual-registration)
 
-A simple plugin to register 2 views of the same object
+<img src="https://github.com/GuignardLab/tapenade/blob/Packaging/imgs/tapenade3.png" width="100">
 
-----------------------------------
+A plugin to obtain parameters for affine transform used to register two views of the same object, e.g as obtained with dual-view microscopes. 
 
-This [napari] plugin was generated with [Cookiecutter] using [@napari]'s [cookiecutter-napari-plugin] template.
+`napari-manual-registration` is a [napari] plugin that is part of the [Tapenade](https://github.com/GuignardLab/tapenade) project. Tapenade is a tool for the analysis of dense 3D tissues acquired with deep imaging microscopy. It is designed to be user-friendly and to provide a comprehensive analysis of the data.
 
-<!--
-Don't miss the full getting started guide to set up your new package:
-https://github.com/napari/cookiecutter-napari-plugin#getting-started
+If you use this plugin for your research, please [cite us](https://github.com/GuignardLab/tapenade/blob/main/README.md#how-to-cite).
 
-and review the napari docs for plugin developers:
-https://napari.org/stable/plugins/index.html
--->
+## Overview
+
+While working with large and dense 3D and 3D+time gastruloid datasets, we found that being able to visualise and interact with the data dynamically greatly helped processing it.
+During the pre-processing stage, dynamical exploration and interaction led to faster tuning of the parameters by allowing direct visual feedback, and gave key biophysical insight during the analysis stage. 
+
+When using our automatic registration tool to spatially register two views of the same organoid, we were sometimes faced with the issue that the tool would not converge to the true registration transformation. This happens when the initial position and orientation of the floating view are too far from their target values. We thus designed a Napari plugin to quickly find a transformation that can be used to initialize our registration tool close to the optimal transformation. From two images loaded in Napari representing two views of the same organoid, the plugin allows the user to 
+1. **manually define a rigid transformation** by continually varying 3D rotations and translations while observing the results until a satisfying fit is found
+2. **annotate matching salient landmarks** (e.g bright dead cells or lumen-like structures) in both the reference and floating views, from which an optimal rigid transformation can be found automatically using principal component analysis.
+
+
+
 
 ## Installation
 
-You can install `napari-manual-registration` via [pip]:
+The plugin obviously requires [napari] to run. If you don't have it yet, follow the instructions [here](https://napari.org/stable/tutorials/fundamentals/installation.html).
+
+The simplest way to install `napari-manual-registration` is via the [napari] plugin manager. Open Napari, go to `Plugins > Install/Uninstall Packages...` and search for `napari-manual-registration`. Click on the install button and you are ready to go!
+
+You can also install `napari-manual-registration` via [pip]:
 
     pip install napari-manual-registration
-
-
 
 To install latest development version :
 
     pip install git+https://github.com/jules-vanaret/napari-manual-registration.git
+
+## Usage
 
 
 ## Contributing
@@ -46,7 +56,11 @@ Distributed under the terms of the [BSD-3] license,
 
 ## Issues
 
-If you encounter any problems, please [file an issue] along with a detailed description.
+If you encounter any problem using this plugin, please [file an issue] on the GitHub repository.
+
+----------------------------------
+
+This [napari] plugin was generated with [Cookiecutter] using [@napari]'s [cookiecutter-napari-plugin] template.
 
 [napari]: https://github.com/napari/napari
 [Cookiecutter]: https://github.com/audreyr/cookiecutter
