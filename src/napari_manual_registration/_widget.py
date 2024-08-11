@@ -35,6 +35,20 @@ class RegistrationWidget(Container):
         )
         self._layer_floating.changed.connect(self._store_data)
 
+        self._toggle_bounding_boxes_checkox = create_widget(
+            widget_type="CheckBox", label="Toggle bounding boxes"
+        )
+        self._toggle_bounding_boxes_checkox.changed.connect(
+            self._toggle_bounding_boxes
+        )
+
+        self._format_layers_explicit_button = create_widget(
+            widget_type="PushButton", label="Format layers for\nexplicit registration"
+        )
+        self._format_layers_explicit_button.changed.connect(
+            self._format_layer_for_explicit_registration
+        )
+
         self._translate_rotation_offset = np.array([0, 0, 0])
 
         self._translate_z = create_widget(
@@ -107,6 +121,13 @@ class RegistrationWidget(Container):
         self._landmarks_layer_ref = None
         self._landmarks_layer_floating = None
 
+        self._format_layers_landmarks_button = create_widget(
+            widget_type="PushButton", label="Format layers for\nlandmarks matching"
+        )
+        self._format_layers_landmarks_button.changed.connect(
+            self._format_layer_for_landmarks_registration
+        )
+
         self._run_landmarks_registration = create_widget(
             widget_type="PushButton", label="Run landmarks registration"
         )
@@ -128,23 +149,26 @@ class RegistrationWidget(Container):
         # append into/extend the container with your widgets
         self.extend(
             [
-                EmptyWidget(label="<u>Layers to register:</u>"),
+                EmptyWidget(label="<b>Layers to register:</b>"),
                 self._layer_ref,
                 self._layer_floating,
-                EmptyWidget(label="<u>Translations:</u>"),
+                self._toggle_bounding_boxes_checkox,
+                EmptyWidget(label="<b>Explicit transforms</b>"),
+                self._format_layers_explicit_button,
+                EmptyWidget(label="Translations:"),
                 self._translate_z,
                 self._translate_y,
                 self._translate_x,
-                EmptyWidget(label="<u>Rotations:</u>"),
+                EmptyWidget(label="Rotations:"),
                 self._slider_rz,
                 self._slider_ry,
                 self._slider_rx,
-                # EmptyWidget(),
-                EmptyWidget(label="<u>Draw landmarks:</u>"),
+                EmptyWidget(label="<b>Landmarks matching</b>"),
+                EmptyWidget(label="Draw landmarks:"),
                 self._create_landmarks_layers,
+                self._format_layers_landmarks_button,
                 self._run_landmarks_registration,
-                # EmptyWidget(),
-                EmptyWidget(label="<u>Save transformation:</u>"),
+                EmptyWidget(label="<b>Save transformation:</b>"),
                 self._save_json_path,
                 self._save_json_button,
             ]
@@ -153,6 +177,102 @@ class RegistrationWidget(Container):
         self.worker = self._scipy_rotation_computer(self._viewer)
         self.worker.start()
 
+    def _toggle_bounding_boxes(self, event):
+
+        if self._layer_ref.value is None or self._layer_floating.value is None:
+            napari.utils.notifications.show_warning(
+                "Please select reference and floating layers first."
+            )
+            return
+
+        self._layer_ref.value.bounding_box.visible = event
+        self._layer_ref.value.bounding_box.opacity = 0.5
+        self._layer_floating.value.bounding_box.visible = event
+        self._layer_floating.value.bounding_box.opacity = 0.5
+
+    def _format_layer_for_explicit_registration(self):
+
+        if self._layer_ref.value is None or self._layer_floating.value is None:
+            napari.utils.notifications.show_warning(
+                "Please select reference and floating layers first."
+            )
+            return
+        
+        self._layer_ref.value.colormap = "cyan"
+        self._layer_floating.value.colormap = "red"
+
+        self._layer_ref.value.blending = "additive"
+        self._layer_floating.value.blending = "additive"
+
+        self._layer_ref.value.rendering = 'attenuated_mip'
+        self._layer_floating.value.rendering = 'attenuated_mip'
+
+        self._layer_ref.value.attenuation = 0.33
+        self._layer_floating.value.attenuation = 0.33
+
+        if self._layer_ref.value.contrast_limits[0] == self._layer_ref.value.data.min():
+            min_perc = np.percentile(self._layer_ref.value.data, 1)
+            self._layer_ref.value.contrast_limits = (min_perc, self._layer_ref.value.contrast_limits[1])
+        if self._layer_floating.value.contrast_limits[0] == self._layer_floating.value.data.min():
+            min_perc = np.percentile(self._layer_floating.value.data, 1)
+            self._layer_floating.value.contrast_limits = (min_perc, self._layer_floating.value.contrast_limits[1])
+        
+        self._viewer.grid.enabled = False
+
+        self._viewer.dims.ndisplay = 3
+        self._viewer.camera.perspective = 10
+        self._viewer.reset_view()
+        self._viewer.camera.angles = (-20,40,150)
+
+    def _format_layer_for_landmarks_registration(self):
+
+        if self._layer_ref.value is None or self._layer_floating.value is None:
+            napari.utils.notifications.show_warning(
+                "Please select reference and floating layers first."
+            )
+            return
+        
+        if self._landmarks_layer_ref is None or self._landmarks_layer_floating is None:
+            napari.utils.notifications.show_warning(
+                "Please create landmarks layers first."
+            )
+            return
+        
+        if len(self._viewer.layers) != 4:
+            napari.utils.notifications.show_warning(
+                "Please remove other layers before running landmarks registration."\
+                "You should have only the reference, floating and associated landmarks layers."
+            )
+            return
+
+        self._layer_ref.value.colormap = "cyan"
+        self._layer_floating.value.colormap = "red"
+
+        self._layer_ref.value.blending = "additive"
+        self._layer_floating.value.blending = "additive"
+
+        self._landmarks_layer_ref.n_edit_dimensions = 3
+        self._landmarks_layer_floating.n_edit_dimensions = 3
+
+        # Move layers in layers list
+        layers_names = [layer.name for layer in self._viewer.layers]
+        current_indices = [
+            layers_names.index(self._layer_ref.value.name),
+            layers_names.index(self._landmarks_layer_ref.name),
+            layers_names.index(self._layer_floating.value.name),
+            layers_names.index(self._landmarks_layer_floating.name),
+        ]
+        self._viewer.layers.move_multiple(current_indices)
+
+        self._viewer.grid.enabled = True
+        self._viewer.grid.shape = (1, 2)
+        self._viewer.grid.stride = 2
+        self._viewer.grid.enabled = False
+
+        self._viewer.dims.ndisplay = 2
+        self._viewer.reset_view()
+
+    
     def _reset_transfos_if_layers_dont_exist(self, event):
         if self._layer_floating.value is None:
             # print('Layer not found, resetting sliders')
@@ -246,6 +366,7 @@ class RegistrationWidget(Container):
                 rotations = R.from_euler(
                     "XYZ", rotations, degrees=True
                 ).as_euler("xyz", degrees=True)
+
                 rotated = cl_rotate(
                     source=self._floating_data,
                     angle_around_z_in_degrees=rotations[0],
@@ -268,6 +389,13 @@ class RegistrationWidget(Container):
         )
 
     def _create_landmarks_layers_callback(self):
+
+        if self._layer_ref.value is None or self._layer_floating.value is None:
+            napari.utils.notifications.show_warning(
+                "Please select reference and floating layers first."
+            )
+            return
+
         if self._landmarks_layer_ref is not None:
             try:
                 self._viewer.layers.remove(self._landmarks_layer_ref)
@@ -370,3 +498,10 @@ class RegistrationWidget(Container):
         self._slider_rz.value = angles[0]
         self._slider_ry.value = angles[1]
         self._slider_rx.value = angles[2]
+
+
+if __name__ == "__main__":
+    viewer = napari.Viewer()
+    widget = RegistrationWidget(viewer)
+    viewer.window.add_dock_widget(widget, area="right")
+    napari.run()
