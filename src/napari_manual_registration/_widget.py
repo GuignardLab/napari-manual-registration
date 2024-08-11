@@ -43,7 +43,8 @@ class RegistrationWidget(Container):
         )
 
         self._format_layers_explicit_button = create_widget(
-            widget_type="PushButton", label="Format layers for\nexplicit registration"
+            widget_type="PushButton",
+            label="Format layers for\nexplicit registration",
         )
         self._format_layers_explicit_button.changed.connect(
             self._format_layer_for_explicit_registration
@@ -122,7 +123,8 @@ class RegistrationWidget(Container):
         self._landmarks_layer_floating = None
 
         self._format_layers_landmarks_button = create_widget(
-            widget_type="PushButton", label="Format layers for\nlandmarks matching"
+            widget_type="PushButton",
+            label="Format layers for\nlandmarks matching",
         )
         self._format_layers_landmarks_button.changed.connect(
             self._format_layer_for_landmarks_registration
@@ -197,32 +199,44 @@ class RegistrationWidget(Container):
                 "Please select reference and floating layers first."
             )
             return
-        
+
         self._layer_ref.value.colormap = "cyan"
         self._layer_floating.value.colormap = "red"
 
         self._layer_ref.value.blending = "additive"
         self._layer_floating.value.blending = "additive"
 
-        self._layer_ref.value.rendering = 'attenuated_mip'
-        self._layer_floating.value.rendering = 'attenuated_mip'
+        self._layer_ref.value.rendering = "attenuated_mip"
+        self._layer_floating.value.rendering = "attenuated_mip"
 
         self._layer_ref.value.attenuation = 0.33
         self._layer_floating.value.attenuation = 0.33
 
-        if self._layer_ref.value.contrast_limits[0] == self._layer_ref.value.data.min():
+        if (
+            self._layer_ref.value.contrast_limits[0]
+            == self._layer_ref.value.data.min()
+        ):
             min_perc = np.percentile(self._layer_ref.value.data, 1)
-            self._layer_ref.value.contrast_limits = (min_perc, self._layer_ref.value.contrast_limits[1])
-        if self._layer_floating.value.contrast_limits[0] == self._layer_floating.value.data.min():
+            self._layer_ref.value.contrast_limits = (
+                min_perc,
+                self._layer_ref.value.contrast_limits[1],
+            )
+        if (
+            self._layer_floating.value.contrast_limits[0]
+            == self._layer_floating.value.data.min()
+        ):
             min_perc = np.percentile(self._layer_floating.value.data, 1)
-            self._layer_floating.value.contrast_limits = (min_perc, self._layer_floating.value.contrast_limits[1])
-        
+            self._layer_floating.value.contrast_limits = (
+                min_perc,
+                self._layer_floating.value.contrast_limits[1],
+            )
+
         self._viewer.grid.enabled = False
 
         self._viewer.dims.ndisplay = 3
         self._viewer.camera.perspective = 10
         self._viewer.reset_view()
-        self._viewer.camera.angles = (-20,40,150)
+        self._viewer.camera.angles = (-20, 40, 150)
 
     def _format_layer_for_landmarks_registration(self):
 
@@ -231,16 +245,19 @@ class RegistrationWidget(Container):
                 "Please select reference and floating layers first."
             )
             return
-        
-        if self._landmarks_layer_ref is None or self._landmarks_layer_floating is None:
+
+        if (
+            self._landmarks_layer_ref is None
+            or self._landmarks_layer_floating is None
+        ):
             napari.utils.notifications.show_warning(
                 "Please create landmarks layers first."
             )
             return
-        
+
         if len(self._viewer.layers) != 4:
             napari.utils.notifications.show_warning(
-                "Please remove other layers before running landmarks registration."\
+                "Please remove other layers before running landmarks registration."
                 "You should have only the reference, floating and associated landmarks layers."
             )
             return
@@ -272,7 +289,6 @@ class RegistrationWidget(Container):
         self._viewer.dims.ndisplay = 2
         self._viewer.reset_view()
 
-    
     def _reset_transfos_if_layers_dont_exist(self, event):
         if self._layer_floating.value is None:
             # print('Layer not found, resetting sliders')
