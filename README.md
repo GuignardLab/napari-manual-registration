@@ -71,7 +71,7 @@ Steps:
 <img src="imgs/reg_1.png">
 
 Steps (the steps 1 to 5 are the same as for the 3D registration):
-6. If you want to switch to the 2D view, click on the `2D` button (it resembles a square when in 2D mode, or a cube when in 3D mode).
+6. If you want to switch to the 2D view, click on the `Toggle 2D/3D view` button (it resembles a square when in 2D mode, or a cube when in 3D mode).
 7. Again, feel free to play with the contrast limits and opacity of the layers to optimize the visibility of your images. First click on the layer name in the layer list, then adjust the sliders in the layer properties widget.
 8. If you wish to hide a layer, you can click on the eye icon next to the layer name in the layer list.
 9. In 2D mode, a slider appears at the bottom of the plugin window. You can use it to slide through the z-slices of your images.
