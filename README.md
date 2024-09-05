@@ -45,6 +45,8 @@ To install latest development version :
 
 The plugin provides two methods to register two views of the same object. The first one consists in selecting manually each transformation parameter (rotation and translation) while observing the result in real-time, either in 2D or 3D (the user can switch between 2D and 3D at any time). The second method consists in manually drawing landmarks in both views, from which the optimal transformation is found automatically using principal component analysis.
 
+<span style="color:red">Be aware that the visualization does not accomodate for voxel anisotropy, so we recommend using isotropic data, or to resize you anisotropic data to an isotropic voxel size (e.g by using [napari-tapenade-processing](https://github.com/GuignardLab/napari-tapenade-processing)).</span>
+
 ### A. Registration by selecting explicit transformation parameters
 
 
