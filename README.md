@@ -50,7 +50,7 @@ The plugin provides two methods to register two views of the same object. The fi
 ### A. Registration by selecting explicit transformation parameters
 
 
-#### 3D registration
+#### Registration with 3D view
 
 We describe below the steps to register two views of the same object in a purely 3D manner. Note that the plugin also allows to switch between 2D and 3D at any time, and 2D view is described in the next section. 
 
@@ -68,7 +68,7 @@ Steps:
 9. Once you are satisfied with the registration, choose a directory to save the transformation parameters by clicking on the `Choose directory` button. The transformation parameters will be saved in a `.json` file in this directory.
 10. Finally, click on the `Save to JSON` button to save the transformation parameters.
 
-#### 2D registration
+#### Registration with 2D view
 
 <img src="imgs/reg_1.png">
 
