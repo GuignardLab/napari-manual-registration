@@ -7,7 +7,7 @@
 [![codecov](https://codecov.io/gh/jules-vanaret/napari-manual-registration/branch/main/graph/badge.svg)](https://codecov.io/gh/jules-vanaret/napari-manual-registration)
 [![napari hub](https://img.shields.io/endpoint?url=https://api.napari-hub.org/shields/napari-manual-registration)](https://napari-hub.org/plugins/napari-manual-registration)
 
-<img src="https://github.com/GuignardLab/tapenade/blob/Packaging/imgs/tapenade3.png" width="100">
+<img src="https://github.com/GuignardLab/tapenade/blob/main/imgs/tapenade3.png" width="100">
 
 A plugin to obtain parameters for affine transform used to register two views of the same object, e.g as obtained with dual-view microscopes. 
 
