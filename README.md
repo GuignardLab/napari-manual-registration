@@ -17,12 +17,20 @@ If you use this plugin for your research, please [cite us](https://github.com/Gu
 
 ## Overview
 
+<p align="middle">
+  <img src="imgs/napari_registration_demo2_3.gif" width="49%" />
+  <img src="imgs/napari_registration_demo_3.gif" width="48.1%" />
+</p>
+
 While working with large and dense 3D and 3D+time gastruloid datasets, we found that being able to visualise and interact with the data dynamically greatly helped processing it.
 During the pre-processing stage, dynamical exploration and interaction led to faster tuning of the parameters by allowing direct visual feedback, and gave key biophysical insight during the analysis stage. 
 
 When using our automatic registration tool to spatially register two views of the same organoid, we were sometimes faced with the issue that the tool would not converge to the true registration transformation. This happens when the initial position and orientation of the floating view are too far from their target values. We thus designed a Napari plugin to quickly find a transformation that can be used to initialize our registration tool close to the optimal transformation. From two images loaded in Napari representing two views of the same organoid, the plugin allows the user to 
 
 1. **annotate matching salient landmarks** (e.g bright dead cells or lumen-like structures) in both the reference and floating views, from which an optimal rigid transformation can be found automatically using principal component analysis.
+
+
+
 2. **manually define a rigid transformation** by continually varying 3D rotations and translations while observing the results until a satisfying fit is found
 
 <img src="imgs/Fig_Napari_registration.png">
