@@ -17,14 +17,9 @@ If you use this plugin for your research, please [cite us](https://github.com/Gu
 
 ## Overview
 
-<p align="middle">
-  <img src="imgs/napari_registration_demo2_3.gif" width="49%" />
-  <img src="imgs/napari_registration_demo_3.gif" width="48.1%" />
-</p>
-
 A. Registration by annotating salient landmarks|B. Registration by selecting explicit transformation parameters
 --|--
-<img src="imgs/napari_registration_demo2_3.gif" width="600" />|<img src="imgs/napari_registration_demo_3.gif" width="587" />
+<img src="imgs/napari_registration_demo2_3.gif" width="355" />|<img src="imgs/napari_registration_demo_3.gif" width="330" />
 
 While working with large and dense 3D and 3D+time gastruloid datasets, we found that being able to visualise and interact with the data dynamically greatly helped processing it.
 During the pre-processing stage, dynamical exploration and interaction led to faster tuning of the parameters by allowing direct visual feedback, and gave key biophysical insight during the analysis stage. 
