@@ -113,6 +113,20 @@ Steps (the steps 1 to 5 are the same as for the 3D registration):
 10. You can now start the registration process by moving the `Translations` and `Rotations` sliders. The floating layer will be transformed in real-time according to the selected parameters.
 11. Once you are satisfied with the registration, choose a directory to save the transformation parameters by clicking on the `Choose directory` button. The transformation parameters will be saved in a `.json` file in this directory. Finally, click on the `Save to JSON` button to save the transformation parameters.
 
+## Demo dataset
+
+A demo dataset is available [here](https://amubox.univ-amu.fr/s/HLktPNLGgMF4jHT).
+
+### Content
+
+This test dataset is composed of two 3D images `bottom_small.tif` and `top_small.tif` that correspond to two halves of the same sample.
+
+### How to use
+
+ - Load the images from the folder (either drag and drop, or "File>Open file(s)").
+ - Specify one of the images as the "Reference layer" (which is fixed), and the other one as the "Layer to move" (usually called "floating").
+ - Choose between the "Explicit transforms" or "Landmarks matching" modes, and follow instructions on the plugin repository for further use.   
+
 ## Contributing
 
 Contributions are very welcome. Tests can be run with [tox], please ensure
