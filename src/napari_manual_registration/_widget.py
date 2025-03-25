@@ -8,6 +8,8 @@ from magicgui.widgets import Container, EmptyWidget, create_widget
 from napari.qt.threading import thread_worker
 from pyclesperanto_prototype import rotate as cl_rotate
 from scipy.spatial.transform import Rotation as R
+from scipy.ndimage import rotate as scipy_rotate
+from scipy.ndimage import affine_transform as scipy_affine
 from skimage.measure import regionprops
 
 
@@ -82,7 +84,11 @@ class RegistrationWidget(Container):
             self._reset_transfos_if_layers_dont_exist
         )
 
-        # rotations : movie the data
+        # rotations
+        self._scipy_rotation_checkbox = create_widget(
+            widget_type="CheckBox", label="Use scipy rotations (slower alternative)"
+        )
+
         self._slider_rz = create_widget(
             widget_type="IntSlider",
             label="   Rot Z",
@@ -162,6 +168,7 @@ class RegistrationWidget(Container):
                 self._translate_y,
                 self._translate_x,
                 EmptyWidget(label="Rotations:"),
+                self._scipy_rotation_checkbox,
                 self._slider_rz,
                 self._slider_ry,
                 self._slider_rx,
@@ -379,19 +386,39 @@ class RegistrationWidget(Container):
             rotations = yield rotations
 
             if rotations is not None and self._floating_data is not None:
-                rotations = R.from_euler(
-                    "XYZ", rotations, degrees=True
-                ).as_euler("xyz", degrees=True)
+                if self._scipy_rotation_checkbox.value:
+                    rotations = R.from_euler(
+                        "XYZ", rotations, degrees=True
+                    ).as_euler("xyz", degrees=True)
 
-                rotated = cl_rotate(
-                    source=self._floating_data,
-                    angle_around_z_in_degrees=rotations[0],
-                    angle_around_y_in_degrees=rotations[1],
-                    angle_around_x_in_degrees=rotations[2],
-                    rotate_around_center=True,
-                    linear_interpolation=False,
-                    auto_size=False,
-                )
+                    rot_mat = R.from_euler("XYZ", rotations, degrees=True).as_matrix()
+                    center = np.array(self._floating_data.shape) / 2
+                    translation = center - rot_mat @ center     
+                    affine = np.eye(4)
+                    affine[:3, :3] = rot_mat
+                    affine[:3, 3] = translation
+
+                    rotated = scipy_affine(
+                        self._floating_data,
+                        affine[:3, :3],
+                        offset=affine[:3, 3],
+                        order=0,
+                        prefilter=False
+                    )
+                else:
+                    rotations = R.from_euler(
+                        "XYZ", rotations, degrees=True
+                    ).as_euler("xyz", degrees=True)
+
+                    rotated = cl_rotate(
+                        source=self._floating_data,
+                        angle_around_z_in_degrees=rotations[0],
+                        angle_around_y_in_degrees=rotations[1],
+                        angle_around_x_in_degrees=rotations[2],
+                        rotate_around_center=True,
+                        linear_interpolation=False,
+                        auto_size=False,
+                    )
 
                 self._layer_floating.value.data = rotated
 
