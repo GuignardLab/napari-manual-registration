@@ -86,7 +86,7 @@ class RegistrationWidget(Container):
 
         # rotations
         self._scipy_rotation_checkbox = create_widget(
-            widget_type="CheckBox", label="Use scipy rotations (slower alternative)"
+            widget_type="CheckBox", label="use scipy rotations (slower alternative)"
         )
 
         self._slider_rz = create_widget(
@@ -425,9 +425,9 @@ class RegistrationWidget(Container):
     def _update_rotation_worker(self, event):
         self.worker.send(
             (
-                self._slider_rz.value,
-                self._slider_ry.value,
-                self._slider_rx.value,
+                int(self._slider_rz.value),
+                float(self._slider_ry.value),
+                int(self._slider_rx.value),
             )
         )
 
