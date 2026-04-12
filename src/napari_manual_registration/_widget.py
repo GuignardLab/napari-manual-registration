@@ -86,7 +86,8 @@ class RegistrationWidget(Container):
 
         # rotations
         self._scipy_rotation_checkbox = create_widget(
-            widget_type="CheckBox", label="use scipy rotations (slower alternative)"
+            widget_type="CheckBox",
+            label="use scipy rotations (slower alternative)",
         )
 
         self._slider_rz = create_widget(
@@ -391,9 +392,11 @@ class RegistrationWidget(Container):
                         "XYZ", rotations, degrees=True
                     ).as_euler("xyz", degrees=True)
 
-                    rot_mat = R.from_euler("XYZ", rotations, degrees=True).as_matrix()
+                    rot_mat = R.from_euler(
+                        "XYZ", rotations, degrees=True
+                    ).as_matrix()
                     center = np.array(self._floating_data.shape) / 2
-                    translation = center - rot_mat @ center     
+                    translation = center - rot_mat @ center
                     affine = np.eye(4)
                     affine[:3, :3] = rot_mat
                     affine[:3, 3] = translation
@@ -403,7 +406,7 @@ class RegistrationWidget(Container):
                         affine[:3, :3],
                         offset=affine[:3, 3],
                         order=0,
-                        prefilter=False
+                        prefilter=False,
                     )
                 else:
                     rotations = R.from_euler(
