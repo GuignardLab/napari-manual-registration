@@ -3,8 +3,6 @@
 [![License BSD-3](https://img.shields.io/pypi/l/napari-manual-registration.svg?color=green)](https://github.com/jules-vanaret/napari-manual-registration/raw/main/LICENSE)
 [![PyPI](https://img.shields.io/pypi/v/napari-manual-registration.svg?color=green)](https://pypi.org/project/napari-manual-registration)
 [![Python Version](https://img.shields.io/pypi/pyversions/napari-manual-registration.svg?color=green)](https://python.org)
-[![tests](https://github.com/jules-vanaret/napari-manual-registration/workflows/tests/badge.svg)](https://github.com/jules-vanaret/napari-manual-registration/actions)
-[![codecov](https://codecov.io/gh/jules-vanaret/napari-manual-registration/branch/main/graph/badge.svg)](https://codecov.io/gh/jules-vanaret/napari-manual-registration)
 [![napari hub](https://img.shields.io/endpoint?url=https://api.napari-hub.org/shields/napari-manual-registration)](https://napari-hub.org/plugins/napari-manual-registration)
 
 <img src="https://github.com/GuignardLab/tapenade/blob/main/imgs/tapenade3.png" width="100">
