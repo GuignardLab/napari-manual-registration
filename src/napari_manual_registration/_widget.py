@@ -1,16 +1,21 @@
 import json
 import os
+import shutil
+import tempfile
 import time
+from pathlib import Path
 
 import napari
 import numpy as np
-from magicgui.widgets import Container, EmptyWidget, create_widget
+import tifffile
+from magicgui.widgets import Container, EmptyWidget, Label, create_widget
 from napari.qt.threading import thread_worker
 from pyclesperanto_prototype import rotate as cl_rotate
 from scipy.spatial.transform import Rotation as R
 from scipy.ndimage import rotate as scipy_rotate
 from scipy.ndimage import affine_transform as scipy_affine
 from skimage.measure import regionprops
+from qtpy.QtWidgets import QComboBox
 
 
 class RegistrationWidget(Container):
@@ -44,9 +49,16 @@ class RegistrationWidget(Container):
             self._toggle_bounding_boxes
         )
 
+        self._debug_initial_only_checkbox = create_widget(
+            widget_type="CheckBox",
+            label="Debug: apply initial transform only",
+            options={"value": False},
+        )
+        self._debug_initial_only_checkbox.visible = False
+
         self._format_layers_explicit_button = create_widget(
             widget_type="PushButton",
-            label="Format layers for\nexplicit registration",
+            label="Format layers",
         )
         self._format_layers_explicit_button.changed.connect(
             self._format_layer_for_explicit_registration
@@ -131,7 +143,7 @@ class RegistrationWidget(Container):
 
         self._format_layers_landmarks_button = create_widget(
             widget_type="PushButton",
-            label="Format layers for\nlandmarks matching",
+            label="Format layers",
         )
         self._format_layers_landmarks_button.changed.connect(
             self._format_layer_for_landmarks_registration
@@ -142,6 +154,35 @@ class RegistrationWidget(Container):
         )
         self._run_landmarks_registration.changed.connect(
             self._run_manual_registration_callback
+        )
+
+        self._modality_combo = QComboBox()
+        self._modality_combo._explicitly_hidden = False
+        self._modality_combo.native = self._modality_combo
+        self._modality_combo.name = ""
+        self._modality_combo.label = ""
+        self._modality_combo.tooltip = ""
+        self._modality_combo.addItems(
+            [
+                "Explicit transforms",
+                "Landmarks matching",
+            ]
+        )
+        self._modality_combo.currentTextChanged.connect(
+            self._update_modality_visibility
+        )
+        self._modality_combo_container = Container(
+            widgets=[self._modality_combo],
+            labels=False,
+        )
+        self._modality_note_label = Label(
+            value="<b>Use one modality at a time (explicit OR landmarks):</b>"
+        )
+        self._explicit_section_label = Label(
+            value="<b>Explicit transforms</b>"
+        )
+        self._landmarks_section_label = Label(
+            value="<b>Landmarks matching</b>"
         )
 
         self._save_json_path = create_widget(
@@ -155,34 +196,134 @@ class RegistrationWidget(Container):
 
         self._save_json_button.clicked.connect(self._save_to_json)
 
-        # append into/extend the container with your widgets
-        self.extend(
+        self._save_mode = QComboBox()
+        self._save_mode._explicitly_hidden = False
+        self._save_mode.native = self._save_mode
+        self._save_mode.name = ""
+        self._save_mode.label = ""
+        self._save_mode.tooltip = ""
+        self._save_mode.addItems(
             [
-                EmptyWidget(label="<b>Layers to register:</b>"),
-                self._layer_ref,
-                self._layer_floating,
-                self._toggle_bounding_boxes_checkox,
-                EmptyWidget(label="<b>Explicit transforms</b>"),
+                "Save parameters (JSON)",
+                "Fuse views",
+            ]
+        )
+        self._save_mode.currentTextChanged.connect(
+            self._update_save_mode_visibility
+        )
+        self._save_mode_container = Container(
+            widgets=[self._save_mode],
+            labels=False,
+        )
+        self._save_mode_note = Label(
+            value="Requires installing vt from the morpheme conda channel"
+        )
+        self._save_mode_note.visible = False
+        self._save_section_label = Label(
+            value="<b>Save transformation:</b>"
+        )
+
+        self._fuse_output_path = create_widget(
+            widget_type="FileEdit",
+            label="Output folder",
+            options={"mode": "d"},
+        )
+        self._fuse_output_name = create_widget(
+            widget_type="LineEdit",
+            label="Output name",
+            options={"value": "fusion_registered.tif"},
+        )
+        self._fuse_add_to_napari = create_widget(
+            widget_type="CheckBox",
+            label="Load fused as layer",
+        )
+        self._run_fusion_button = create_widget(
+            widget_type="PushButton", label="Run fusion"
+        )
+        self._run_fusion_button.clicked.connect(self._run_fusion)
+
+        self._json_save_container = Container(
+            widgets=[self._save_json_path, self._save_json_button],
+            layout="horizontal",
+        )
+        self._fuse_row_bottom = Container(
+            widgets=[self._fuse_add_to_napari, self._run_fusion_button],
+            layout="horizontal",
+        )
+        self._fuse_container = Container(
+            widgets=[
+                self._fuse_output_path,
+                self._fuse_output_name,
+                self._fuse_row_bottom,
+            ]
+        )
+        self._explicit_container = Container(
+            widgets=[
+                self._explicit_section_label,
                 self._format_layers_explicit_button,
-                EmptyWidget(label="Translations:"),
+                Label(value="Translations:"),
                 self._translate_z,
                 self._translate_y,
                 self._translate_x,
-                EmptyWidget(label="Rotations:"),
+                Label(value="Rotations:"),
                 self._scipy_rotation_checkbox,
                 self._slider_rz,
                 self._slider_ry,
                 self._slider_rx,
-                EmptyWidget(label="<b>Landmarks matching</b>"),
-                EmptyWidget(label="Draw landmarks:"),
+            ],
+            labels=False,
+        )
+        self._landmarks_container = Container(
+            widgets=[
+                self._landmarks_section_label,
+                Label(value="Draw landmarks:"),
                 self._create_landmarks_layers,
                 self._format_layers_landmarks_button,
                 self._run_landmarks_registration,
-                EmptyWidget(label="<b>Save transformation:</b>"),
-                self._save_json_path,
-                self._save_json_button,
+            ],
+            labels=False,
+        )
+        self._modality_section_container = Container(
+            widgets=[
+                self._modality_note_label,
+                self._modality_combo_container,
+                self._explicit_container,
+                self._landmarks_container,
+            ],
+            labels=False,
+        )
+        self._save_section_container = Container(
+            widgets=[
+                self._save_section_label,
+                self._save_mode_container,
+                self._save_mode_note,
+                self._json_save_container,
+                self._fuse_container,
+            ],
+            labels=False,
+        )
+
+        # append into/extend the container with your widgets
+        self.extend(
+            [
+                EmptyWidget(label="<b>Layers to register:</b>"),
+                self._debug_initial_only_checkbox,
+                self._layer_ref,
+                self._layer_floating,
+                self._toggle_bounding_boxes_checkox,
             ]
         )
+
+        layout = self.native.layout()
+        if hasattr(layout, "addRow"):
+            layout.addRow(self._modality_section_container.native)
+            layout.addRow(self._save_section_container.native)
+        else:
+            layout.addWidget(self._modality_section_container.native)
+            layout.addWidget(self._save_section_container.native)
+
+        self._update_save_mode_visibility(None)
+        self._update_modality_visibility(None)
 
         self.worker = self._scipy_rotation_computer(self._viewer)
         self.worker.start()
@@ -333,6 +474,211 @@ class RegistrationWidget(Container):
             napari.utils.notifications.show_info(
                 f"Transformation saved to {file_path}"
             )
+
+    def _update_save_mode_visibility(self, event):
+        mode = (
+            self._save_mode.currentText()
+            if hasattr(self._save_mode, "currentText")
+            else self._save_mode.value
+        )
+        is_json = mode == "Save parameters (JSON)"
+        self._json_save_container.visible = is_json
+        self._fuse_container.visible = not is_json
+        self._save_mode_note.visible = not is_json
+
+    def _update_modality_visibility(self, event):
+        mode = (
+            self._modality_combo.currentText()
+            if hasattr(self._modality_combo, "currentText")
+            else self._modality_combo.value
+        )
+        is_explicit = mode == "Explicit transforms"
+        self._explicit_container.visible = is_explicit
+        self._landmarks_container.visible = not is_explicit
+
+    def _get_layer_voxel_size(self, layer):
+        if layer is None:
+            return [1, 1, 1]
+        scale = getattr(layer, "scale", None)
+        if scale is None or len(scale) < 3:
+            return [1, 1, 1]
+        return [float(scale[2]), float(scale[1]), float(scale[0])]
+
+    def _prepare_fusion_array(self, data, label):
+        if data.dtype == np.bool_:
+            napari.utils.notifications.show_warning(
+                f"{label} layer is boolean; converting to uint16."
+            )
+            return data.astype(np.uint16)
+
+        if np.issubdtype(data.dtype, np.floating):
+            data_min = float(np.nanmin(data))
+            data_max = float(np.nanmax(data))
+            if data_min >= 0.0 and data_max <= 1.0:
+                napari.utils.notifications.show_info(
+                    f"{label} appears normalized in [0, 1]; scaling to uint16 for fusion."
+                )
+                return (data * np.iinfo(np.uint16).max).astype(np.uint16)
+            napari.utils.notifications.show_warning(
+                f"{label} is float; converting to uint16 for fusion."
+            )
+            data = np.clip(data, 0, np.iinfo(np.uint16).max)
+            return data.astype(np.uint16)
+
+        if data.dtype not in (np.int16, np.uint16):
+            napari.utils.notifications.show_warning(
+                f"{label} dtype {data.dtype} converted to uint16 for fusion."
+            )
+            data = np.clip(data, 0, np.iinfo(np.uint16).max)
+            return data.astype(np.uint16)
+
+        return data
+
+    def _run_fusion(self):
+        if self._layer_ref.value is None or self._layer_floating.value is None:
+            napari.utils.notifications.show_warning(
+                "Please select reference and floating layers first."
+            )
+            return
+
+        output_dir = str(self._fuse_output_path.value)
+        if output_dir == "." or not os.path.exists(output_dir):
+            napari.utils.notifications.show_warning(
+                "Please select a valid output directory first."
+            )
+            return
+
+        output_name = str(self._fuse_output_name.value).strip()
+        if output_name == "":
+            napari.utils.notifications.show_warning(
+                "Please provide a valid output file name."
+            )
+            return
+
+        if not output_name.lower().endswith(".tif"):
+            output_name = f"{output_name}.tif"
+
+        try:
+            from tapenade import reconstruction
+        except Exception:
+            napari.utils.notifications.show_error(
+                "tapenade is not available. Please install it to run fusion."
+            )
+            return
+
+        ref_data = self._prepare_fusion_array(
+            self._layer_ref.value.data, "Reference"
+        )
+        float_data = self._prepare_fusion_array(
+            self._layer_floating.value.data, "Floating"
+        )
+        if ref_data.ndim != 3 or float_data.ndim != 3:
+            napari.utils.notifications.show_warning(
+                "Fusion currently supports 3D volumes only."
+            )
+            return
+
+        input_voxel = self._get_layer_voxel_size(self._layer_ref.value)
+        output_voxel = input_voxel
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_root = Path(temp_dir)
+            sample_dir = temp_root / "sample"
+            raw_dir = sample_dir / "raw"
+            trsf_dir = sample_dir / "trsf"
+            reg_dir = sample_dir / "registered"
+            fused_dir = sample_dir / "fused"
+            weights_dir = sample_dir / "weights"
+            weights_before = weights_dir / "before_trsf"
+            weights_after = weights_dir / "after_trsf"
+
+            for path in [
+                raw_dir,
+                trsf_dir,
+                reg_dir,
+                fused_dir,
+                weights_before,
+                weights_after,
+            ]:
+                path.mkdir(parents=True, exist_ok=True)
+
+            ref_name = "ref.tif"
+            float_name = "float.tif"
+
+            tifffile.imwrite(raw_dir / ref_name, ref_data)
+            tifffile.imwrite(raw_dir / float_name, float_data)
+
+            json_path = sample_dir / "initial_transformation.json"
+            data_to_save = {
+                "rot_z": self._slider_rz.value,
+                "rot_y": self._slider_ry.value,
+                "rot_x": self._slider_rx.value,
+                "trans_z": self._translate_z.value,
+                "trans_y": self._translate_y.value,
+                "trans_x": self._translate_x.value,
+            }
+            with open(json_path, "w") as json_file:
+                json.dump(data_to_save, json_file, indent=4)
+
+            reconstruction.register(
+                path_data=raw_dir,
+                path_transformation=trsf_dir,
+                path_registered_data=reg_dir,
+                reference_image=ref_name,
+                floating_image=float_name,
+                input_voxel=input_voxel,
+                output_voxel=output_voxel,
+                compute_trsf=1,
+                input_init_trsf_from_plugin=str(json_path),
+                test_init=1 if self._debug_initial_only_checkbox.value else 0,
+            )
+
+            ref_registered_path = reg_dir / ref_name
+            if not ref_registered_path.exists():
+                shutil.copyfile(raw_dir / ref_name, ref_registered_path)
+
+            if not self._debug_initial_only_checkbox.value:
+                try:
+                    refined_trans, refined_angles = (
+                        reconstruction.compute_transformation_from_trsf_files(
+                            trsf_dir
+                        )
+                    )
+                    napari.utils.notifications.show_info(
+                        "Refined transform (XYZ): "
+                        f"trans={np.round(refined_trans, 3)}, "
+                        f"rot_deg={np.round(refined_angles, 3)}"
+                    )
+                except Exception:
+                    napari.utils.notifications.show_warning(
+                        "Could not read refined transformation from trsf files."
+                    )
+
+            reconstruction.fuse_sides(
+                folder=sample_dir,
+                reference_image=ref_name,
+                floating_image=float_name,
+                folder_output=fused_dir,
+                name_output=output_name,
+                input_voxel=input_voxel,
+                output_voxel=output_voxel,
+            )
+
+            output_path = Path(output_dir) / output_name
+            shutil.copyfile(fused_dir / output_name, output_path)
+
+        if self._fuse_add_to_napari.value:
+            fused_data = tifffile.imread(Path(output_dir) / output_name)
+            scale = (output_voxel[2], output_voxel[1], output_voxel[0])
+            self._viewer.add_image(
+                fused_data,
+                name=f"fused_{self._layer_ref.value.name}",
+                scale=scale,
+            )
+
+        napari.utils.notifications.show_info(
+            f"Fused volume saved to {Path(output_dir) / output_name}"
+        )
 
     def _store_data(self, event):
         self._floating_data = self._layer_floating.value.data
