@@ -220,7 +220,7 @@ class RegistrationWidget(Container):
         )
         self._save_mode_note.visible = False
         self._save_section_label = Label(
-            value="<b>Save transformation:</b>"
+            value="<b>Save transformation or fuse images:</b>"
         )
 
         self._fuse_output_path = create_widget(

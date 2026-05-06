@@ -26,8 +26,6 @@ When using our automatic registration tool to spatially register two views of th
 
 1. **annotate matching salient landmarks** (e.g bright dead cells or lumen-like structures) in both the reference and floating views, from which an optimal rigid transformation can be found automatically using principal component analysis.
 
-
-
 2. **manually define a rigid transformation** by continually varying 3D rotations and translations while observing the results until a satisfying fit is found
 
 <img src="imgs/Fig_Napari_registration.png">
@@ -42,9 +40,9 @@ You can also install `napari-manual-registration` via [pip]:
 
     pip install napari-manual-registration
 
-To install latest development version :
+To get the option to directly fuse the registered views in Napari, you will also need to install the package `vt` from the `morpheme` channel:
 
-    pip install git+https://github.com/jules-vanaret/napari-manual-registration.git
+    conda install vt -c morpheme
 
 ## Usage
 
@@ -53,6 +51,13 @@ The plugin provides two methods to register two views of the same object. The fi
 > [!CAUTION]
 > Be aware that the visualization does not accomodate for voxel anisotropy, so we recommend using isotropic data, or to resize you anisotropic data to an isotropic voxel size (e.g by using [napari-tapenade-processing](https://github.com/GuignardLab/napari-tapenade-processing)).
 
+Tutorials structure:
+- A. Registration by annotating salient landmarks
+- B. Registration by selecting explicit transformation parameters
+        - Registration with 3D view
+        - Registration with 2D view
+- C. Export the transformation parameters to a JSON file or fuse the registered views
+
 ### A. Registration by annotating salient landmarks
 
 <img src="imgs/reg_2_3.png">
@@ -60,8 +65,8 @@ The plugin provides two methods to register two views of the same object. The fi
 Steps:
 1. First, load your images in Napari. You can drag and drop them from your file explorer to the Napari viewer, or open them using the `File > Open files...` menu.
 2. Click on the `Plugins > Manual Registration` menu to open the plugin.
-3. Select the reference layer from the combo box. The reference layer is chosen to be the one that does not move.
-4. Select the floating layer from the combo box. The floating layer is the one that will be transformed.
+3. Select the reference layer from the combo box. The reference layer is chosen to be the one that does not move. Select the floating layer from the combo box. The floating layer is the one that will be transformed.
+4. Select "Landmarks matching" from the drop down menu.
 5. Click the `Create landmarks layers` button to create two new Labels layers that will be used to annotate the landmarks in the reference and floating views.
 6. We recommend pressing the `Format layers for landmarks matching` button so that your layers are automatically formatted for you to begin the registration process. Napari offers a wide range of customisation options for the layers appearances, so feel free to play with them if our formatting does not fit your preferences. ;)
 7. We first recommend hiding the reference layer and the reference landmarks layer by clicking on the eye icon next to the layer name in the layer list. This will allow you to focus on the floating layer and the floating landmarks layer.
@@ -75,8 +80,9 @@ Steps:
 15. Navigate to the z-slice of the reference view that corresponds to the z-slice of the floating view where you drew the first landmark.
 16. Draw a "blob" around the corresponding landmark in the reference view by clicking and dragging your mouse.
 17. Increment your label value by clicking on the `+` button in the layer properties widget each time you draw a new widget. Repeat steps 15 to 17 until you have annotated all the salient landmarks in the reference view.
-18. Once you have annotated all the salient landmarks in the reference view, click on the `Run landmark registration` button. The plugin will automatically find the optimal transformation that aligns the floating landmarks to the reference landmarks using principal component analysis. 
-19. If you are satisfied with the registration, choose a directory to save the transformation parameters by clicking on the `Choose directory` button. The transformation parameters will be saved in a `.json` file in this directory. Finally, click on the `Save to JSON` button to save the transformation parameters.
+18. Once you have annotated all the salient landmarks in the reference view, click on the `Run landmark registration` button. The plugin will automatically find the optimal transformation that aligns the floating landmarks to the reference landmarks using principal component analysis.
+
+Go to section C to learn how to save the transformation parameters or fuse the registered views in Napari.
 
 ### B. Registration by selecting explicit transformation parameters
 
@@ -92,25 +98,47 @@ Steps:
 2. Click on the `Plugins > Manual Registration` menu to open the plugin.
 3. Select the reference layer from the combo box. The reference layer is chosen to be the one that does not move.
 4. Select the floating layer from the combo box. The floating layer is the one that will be transformed.
-5. We recommend pressing the `Format layers for explicit registration` button so that your layers are automatically formatted for you to begin the registration process. Napari offers a wide range of customisation options for the layers appearances, so feel free to play with them if our formatting does not fit your preferences. ;)
-6. You can now start the registration process by moving the `Translations` and `Rotations` sliders. The floating layer will be transformed in real-time according to the selected parameters. 
-7. To optimize the visibility of your images, you can change the contrast limits and opacity of a layer by clicking on the layer name in the layer list and adjusting the sliders in the layer properties widget.
-8. If you wish to hide a layer, you can click on the eye icon next to the layer name in the layer list.
-9. Once you are satisfied with the registration, choose a directory to save the transformation parameters by clicking on the `Choose directory` button. The transformation parameters will be saved in a `.json` file in this directory.
-10. Finally, click on the `Save to JSON` button to save the transformation parameters.
+5. Select "Explicit transforms" from the drop down menu.
+6. We recommend pressing the `Format layers` button so that your layers are automatically formatted for you to begin the registration process. Napari offers a wide range of customisation options for the layers appearances, so feel free to play with them if our formatting does not fit your preferences. ;)
+7. You can now start the registration process by moving the `Translations` and `Rotations` sliders. The floating layer will be transformed in real-time according to the selected parameters. 
+8. To optimize the visibility of your images, you can change the contrast limits and opacity of a layer by clicking on the layer name in the layer list and adjusting the sliders in the layer properties widget.
+9. If you wish to hide a layer, you can click on the eye icon next to the layer name in the layer list.
+
+Go to section C to learn how to save the transformation parameters or fuse the registered views in Napari.
 
 #### Registration with 2D view
 
 <img src="imgs/reg_1.png">
 
-Steps (the steps 1 to 5 are the same as for the 3D registration):
+Steps (the steps 1 to 6 are the same as for the 3D registration):
 
-6. If you want to switch to the 2D view, click on the `Toggle 2D/3D view` button (it resembles a square when in 2D mode, or a cube when in 3D mode).
-7. Again, feel free to play with the contrast limits and opacity of the layers to optimize the visibility of your images. First click on the layer name in the layer list, then adjust the sliders in the layer properties widget.
-8. If you wish to hide a layer, you can click on the eye icon next to the layer name in the layer list.
-9. In 2D mode, a slider appears at the bottom of the plugin window. You can use it to slide through the z-slices of your images.
-10. You can now start the registration process by moving the `Translations` and `Rotations` sliders. The floating layer will be transformed in real-time according to the selected parameters.
-11. Once you are satisfied with the registration, choose a directory to save the transformation parameters by clicking on the `Choose directory` button. The transformation parameters will be saved in a `.json` file in this directory. Finally, click on the `Save to JSON` button to save the transformation parameters.
+7. If you want to switch to the 2D view, click on the `Toggle 2D/3D view` button (it resembles a square when in 2D mode, or a cube when in 3D mode).
+8. In 2D mode, a slider appears at the bottom of the plugin window. You can use it to slide through the z-slices of your images.
+9. If you wish to hide a layer, you can click on the eye icon next to the layer name in the layer list.
+10. Again, feel free to play with the contrast limits and opacity of the layers to optimize the visibility of your images. First click on the layer name in the layer list, then adjust the sliders in the layer properties widget.
+11. You can now start the registration process by moving the `Translations` and `Rotations` sliders. The floating layer will be transformed in real-time according to the selected parameters.
+
+Go to section C to learn how to save the transformation parameters or fuse the registered views in Napari.
+
+
+### C. Export the transformation parameters to a JSON file or fuse the registered views in Napari
+
+#### Save the transformation parameters to a JSON file
+
+1. Once you are satisfied with the registration, select "Save Parameters (JSON)" from the drop down menu.
+2. Choose a directory to save the transformation parameters by clicking on the `Choose directory` button. The transformation parameters will be saved in a `.json` file in this directory.
+3. Finally, click on the `Save to JSON` button to save the transformation parameters.
+
+<img src="imgs/export_save.png" width="50%">
+
+#### Fuse the registered views (optionnally load the fused image in Napari)
+
+1. Once you are satisfied with the registration, select "Fuse views" from the drop down menu.
+2. Choose a directory to save the fused image by clicking on the `Choose directory` button. Type the name of the fused image in the `Output name` text box. The fused image will be saved in this directory with the specified name.
+3. Optionally, if you want to load the fused image in Napari, check the `Load fused as layer` checkbox.
+4. Finally, click on the `Run fusion` button to fuse the registered views and save the fused image. If you checked the `Load fused as layer` checkbox, the fused image will also be loaded in Napari as a new layer.
+
+<img src="imgs/export_fuse.png" width="50%">
 
 ## Demo dataset
 
