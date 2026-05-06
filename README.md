@@ -154,6 +154,12 @@ This test dataset is composed of two 3D images `bottom_small.tif` and `top_small
  - Specify one of the images as the "Reference layer" (which is fixed), and the other one as the "Layer to move" (usually called "floating").
  - Choose between the "Explicit transforms" or "Landmarks matching" modes, and follow instructions on the plugin repository for further use.   
 
+## How to cite
+
+If you use this plugin for your research, please cite us using the following reference:
+
+- Jules Vanaret, Alice Gros, Valentin Dunsing-Eichenauer, Agathe Rostan, Philippe Roudot, Pierre-François Lenne, Léo Guignard, Sham Tlili (2025) <b>A quantitative pipeline for whole-mount deep imaging and analysis of multi-layered organoids across scales</b>. eLife 14:RP107154 ; doi:https://doi.org/10.7554/eLife.107154.2
+
 ## Contributing
 
 Contributions are very welcome. Tests can be run with [tox], please ensure
