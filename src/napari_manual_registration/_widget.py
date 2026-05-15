@@ -166,6 +166,7 @@ class RegistrationWidget(Container):
             [
                 "Explicit transforms",
                 "Landmarks matching",
+                "Load from JSON",
             ]
         )
         self._modality_combo.currentTextChanged.connect(
@@ -176,7 +177,9 @@ class RegistrationWidget(Container):
             labels=False,
         )
         self._modality_note_label = Label(
-            value="<b>Use one modality at a time (explicit OR landmarks):</b>"
+            value=(
+                "<b>Use one modality at a time (explicit OR landmarks OR JSON):</b>"
+            )
         )
         self._explicit_section_label = Label(
             value="<b>Explicit transforms</b>"
@@ -184,6 +187,20 @@ class RegistrationWidget(Container):
         self._landmarks_section_label = Label(
             value="<b>Landmarks matching</b>"
         )
+
+        self._load_json_path = create_widget(
+            widget_type="FileEdit",
+            label="Transform JSON",
+            options={
+                "mode": "r",
+                "filter": "JSON files (*.json)",
+            },
+        )
+        self._apply_json_button = create_widget(
+            widget_type="PushButton",
+            label="Apply JSON transform",
+        )
+        self._apply_json_button.clicked.connect(self._apply_json_transform)
 
         self._save_json_path = create_widget(
             widget_type="FileEdit",
@@ -259,7 +276,7 @@ class RegistrationWidget(Container):
         )
         self._explicit_container = Container(
             widgets=[
-                self._explicit_section_label,
+                # self._explicit_section_label,
                 self._format_layers_explicit_button,
                 Label(value="Translations:"),
                 self._translate_z,
@@ -275,11 +292,19 @@ class RegistrationWidget(Container):
         )
         self._landmarks_container = Container(
             widgets=[
-                self._landmarks_section_label,
+                # self._landmarks_section_label,
                 Label(value="Draw landmarks:"),
                 self._create_landmarks_layers,
                 self._format_layers_landmarks_button,
                 self._run_landmarks_registration,
+            ],
+            labels=False,
+        )
+        self._json_container = Container(
+            widgets=[
+                Label(value="Load transform from JSON:"),
+                self._load_json_path,
+                self._apply_json_button,
             ],
             labels=False,
         )
@@ -289,6 +314,7 @@ class RegistrationWidget(Container):
                 self._modality_combo_container,
                 self._explicit_container,
                 self._landmarks_container,
+                self._json_container,
             ],
             labels=False,
         )
@@ -493,8 +519,11 @@ class RegistrationWidget(Container):
             else self._modality_combo.value
         )
         is_explicit = mode == "Explicit transforms"
+        is_landmarks = mode == "Landmarks matching"
+        is_json = mode == "Load from JSON"
         self._explicit_container.visible = is_explicit
-        self._landmarks_container.visible = not is_explicit
+        self._landmarks_container.visible = is_landmarks
+        self._json_container.visible = is_json
 
     def _get_layer_voxel_size(self, layer):
         if layer is None:
@@ -890,6 +919,63 @@ class RegistrationWidget(Container):
         self._slider_rz.value = angles[0]
         self._slider_ry.value = angles[1]
         self._slider_rx.value = angles[2]
+
+    def _apply_json_transform(self):
+        if self._layer_floating.value is None:
+            napari.utils.notifications.show_warning(
+                "Please select a layer to move first."
+            )
+            return
+
+        json_path = str(self._load_json_path.value)
+        if json_path == "." or not os.path.exists(json_path):
+            napari.utils.notifications.show_warning(
+                "Please select a valid JSON file first."
+            )
+            return
+
+        try:
+            with open(json_path, "r") as json_file:
+                data = json.load(json_file)
+        except Exception:
+            napari.utils.notifications.show_error("Could not read JSON file.")
+            return
+
+        required_keys = {
+            "rot_z",
+            "rot_y",
+            "rot_x",
+            "trans_z",
+            "trans_y",
+            "trans_x",
+        }
+        if not required_keys.issubset(data.keys()):
+            napari.utils.notifications.show_error(
+                "JSON file does not contain expected transform keys."
+            )
+            return
+
+        self._translate_rotation_offset = np.array([0, 0, 0])
+
+        try:
+            self._translate_z.value = float(data["trans_z"])
+            self._translate_y.value = float(data["trans_y"])
+            self._translate_x.value = float(data["trans_x"])
+            self._slider_rz.value = float(data["rot_z"])
+            self._slider_ry.value = float(data["rot_y"])
+            self._slider_rx.value = float(data["rot_x"])
+        except Exception:
+            napari.utils.notifications.show_error(
+                "JSON values must be numeric."
+            )
+            return
+
+        self._update_translation()
+        self._update_rotation_worker(None)
+
+        napari.utils.notifications.show_info(
+            "Applied JSON transform to floating layer."
+        )
 
 
 if __name__ == "__main__":

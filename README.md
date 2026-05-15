@@ -142,6 +142,16 @@ Go to section C to learn how to save the transformation parameters or fuse the r
 
 <img src="imgs/export_fuse.png" width="50%">
 
+### D. Load a JSON file with transformation parameters and apply to loaded views
+
+Use this mode to apply a previously saved transformation (from Section C) to the currently selected "Layer to move". This can be useful if you have multichannel images and you want to apply the same registration transform to all channels by saving the transform parameters as a JSON file and applying it to each channel iteratively. The same principle can be used for temporal images, by applying the same registration transform to each time frame iteratively (even though you might want to use automatic registration in a script, e.g via our [registration notebook](https://github.com/GuignardLab/tapenade/blob/main/src/tapenade/notebooks/registration_notebook.ipynb))
+
+1. Load your images in Napari and select the reference and floating layers as usual.
+2. In the modality drop down menu, select "Load from JSON".
+3. Click on the file field to choose the JSON file containing the saved parameters.
+4. Click on the `Apply JSON transform` button to apply the transform to the floating layer.
+
+
 ## Demo dataset
 
 A demo dataset is available [here](https://amubox.univ-amu.fr/s/HLktPNLGgMF4jHT).
