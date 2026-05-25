@@ -44,8 +44,7 @@ You can also install `napari-manual-registration` via [pip]:
 
 To get the option to directly fuse the registered views in Napari, you will also need to install the package `vt` from the `morpheme` channel:
 
-    conda install vt -c morpheme
-
+    conda install -c conda-forge -c morpheme --strict-channel-priority vt
 ## Usage
 
 The plugin provides two methods to register two views of the same object. The first method consists in manually drawing landmarks in both views, from which the optimal transformation is found automatically using principal component analysis. The second one consists in selecting manually each transformation parameter (rotation and translation) while observing the result in real-time, either in 2D or 3D (the user can switch between 2D and 3D at any time).
